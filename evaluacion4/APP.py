@@ -150,7 +150,7 @@ class App:
             )
 
             if user_id:
-                self.user_id = user_id               # ✅ ES UN INT
+                self.user_id = user_id               #ES UN INT
                 self.username = self.input_username.value.strip()
                 self.page_main_menu()
             else:
@@ -253,13 +253,14 @@ class App:
                 self.page.update()
                 return
 
+            indicator = self.dropdown.value
             date_str = self.date_input.value.strip()
 
-            # 📅 Convertir fecha a formato Oracle
+            # Convertir fecha a formato Oracle
             if date_str:
                 try:
                     dt = datetime.datetime.strptime(date_str, "%d-%m-%Y")
-                    oracle_date = dt.strftime("%Y-%m-%d")  # ✅ FORMATO ORACLE
+                    oracle_date = dt.strftime("%Y-%m-%d")
                 except ValueError:
                     self.result_text.value = "Formato de fecha inválido (DD-MM-YYYY)"
                     self.page.update()
@@ -267,10 +268,11 @@ class App:
             else:
                 oracle_date = datetime.date.today().strftime("%Y-%m-%d")
 
-            value = self.finance.get_chilean_indicator(
-                self.dropdown.value,
-                date_str
-            )
+            # IPC NO USA FECHA (es mensual)
+            if indicator == "ipc":
+                value = self.finance.get_chilean_indicator(indicator, None)
+            else:
+                value = self.finance.get_chilean_indicator(indicator, date_str)
 
             if value is None:
                 self.result_text.value = "No se pudo obtener el indicador"
@@ -279,9 +281,9 @@ class App:
 
             self.result_text.value = f"Valor: {value}"
 
-            # 💾 Guardar historial (FECHA YA CORRECTA)
+            # Guardar historial
             self.db.insert_indicator_history(
-                indicator_name=self.dropdown.value,
+                indicator_name=indicator,
                 value=value,
                 value_date=oracle_date,
                 source="mindicador.cl",
